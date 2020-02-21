@@ -31,21 +31,38 @@ namespace nh
                     continue;
                 }
 
-                var doujin = await SearchClient.SearchByIdAsync(id);
+                // Search for doujin and print out info
+                GalleryElement doujin = new GalleryElement();
+                try
+                {
+                    doujin = await SearchClient.SearchByIdAsync(id);
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Error finding doujin...\n");
+                    continue;
+                }
+
                 PrintDoujinInfo(doujin);
                 Console.WriteLine();
 
-                Console.Write("Enter a filename: ");
+                // Get filename
+                Console.Write("Enter a filename (optional): ");
                 string filename = Console.ReadLine();
 
+                if (filename == string.Empty)
+                {
+                    filename = id.ToString();
+                }
                 if (System.IO.Path.GetExtension(filename) != ".pdf")
                 {
                     filename += ".pdf";
                 }
 
-                Console.WriteLine("Saving...");
+                // Download and save
                 CreatePdf(doujin, filename);
-                Console.WriteLine("Success!\n");
+
+                Console.WriteLine("Done!\n");
             }
         }
 
@@ -73,10 +90,23 @@ namespace nh
 
             // get all images from web
             var imgUrls = doujin.pages.Select(p => p.imageUrl.ToString()).ToList();
-            var imgData = imgUrls.Select(url => ImageDataFactory.Create(url)).ToList();
+            var imgData = new List<ImageData>();
+
+            using (var progress = new ProgressBar())
+            {
+                Console.WriteLine("Downloading... ");
+                for (int i = 0; i < imgUrls.Count; i++)
+                {
+                    imgData.Add(ImageDataFactory.Create(imgUrls[i]));
+                    progress.Report((double)i / imgUrls.Count);
+                }
+                Console.WriteLine("Download finished!");
+                progress.Dispose();
+            }
 
             // loop through and add images to document
             Image pdfImg;
+            Console.WriteLine("Saving... ");
             for (int i = 0; i < imgData.Count; i++)
             {
                 // convert current image
@@ -93,6 +123,7 @@ namespace nh
             }
 
             document.Close();
+            Console.WriteLine("Saved successfully!");
         }
 
         static void CreatePdfNoVerbose(GalleryElement doujin, string filename)
