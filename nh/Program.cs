@@ -75,14 +75,14 @@ namespace nh
             Console.WriteLine("Pages:  " + doujin.numPages);
         }
 
-        static async Task CreateMultiplePdfs(IEnumerable<GalleryElement> doujins)
-        {
-            foreach (var doujin in doujins)
-            {
-                CreatePdfAsync(doujin, doujin.id.ToString() + ".pdf");
-            }
+        //static async Task CreateMultiplePdfs(IEnumerable<GalleryElement> doujins)
+        //{
+        //    foreach (var doujin in doujins)
+        //    {
+        //        CreatePdfAsync(doujin, doujin.id.ToString() + ".pdf");
+        //    }
             
-        }
+        //}
 
         static void CreatePdf(GalleryElement doujin, string filename)
         {
@@ -109,7 +109,7 @@ namespace nh
                     imgData.Add(ImageDataFactory.Create(imgUrls[i]));
                     progress.Report((double)i / imgUrls.Count);
                 }
-                Console.WriteLine("Download finished!");
+                Console.WriteLine("\nDownload finished!");
                 progress.Dispose();
             }
 
