@@ -32,7 +32,7 @@ namespace nh
                 }
 
                 // Search for doujin and print out info
-                GalleryElement doujin = new GalleryElement();
+                GalleryElement doujin;
                 try
                 {
                     doujin = await SearchClient.SearchByIdAsync(id);
