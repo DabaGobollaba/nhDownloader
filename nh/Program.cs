@@ -44,7 +44,7 @@ namespace nh
                 }
 
                 Console.WriteLine("Saving...");
-                CreatePDF(doujin, filename);
+                CreatePdf(doujin, filename);
                 Console.WriteLine("Success!\n");
             }
         }
@@ -58,7 +58,44 @@ namespace nh
             Console.WriteLine("Pages:  " + doujin.numPages);
         }
 
-        static void CreatePDF(GalleryElement doujin, string filename)
+        static void CreatePdf(GalleryElement doujin, string filename)
+        {
+            // set pdf path/name
+            var file = new FileInfo(filename);
+
+            // open file path
+            var pdfWriter = new PdfWriter(file);
+            var pdfDocument = new PdfDocument(pdfWriter);
+
+            // create document
+            var document = new Document(pdfDocument);
+
+
+            // get all images from web
+            var imgUrls = doujin.pages.Select(p => p.imageUrl.ToString()).ToList();
+            var imgData = imgUrls.Select(url => ImageDataFactory.Create(url)).ToList();
+
+            // loop through and add images to document
+            Image pdfImg;
+            for (int i = 0; i < imgData.Count; i++)
+            {
+                // convert current image
+                pdfImg = new Image(imgData[i]);
+
+                // add a new page to the pdf
+                pdfDocument.AddNewPage(new PageSize(pdfImg.GetImageWidth(), pdfImg.GetImageHeight()));
+
+                // set image position
+                pdfImg.SetFixedPosition(i + 1, 0, 0);
+
+                // add current image to document
+                document.Add(pdfImg);
+            }
+
+            document.Close();
+        }
+
+        static void CreatePdfNoVerbose(GalleryElement doujin, string filename)
         {
             // set pdf path/name
             var file = new FileInfo(filename);
