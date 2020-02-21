@@ -75,6 +75,15 @@ namespace nh
             Console.WriteLine("Pages:  " + doujin.numPages);
         }
 
+        static async Task CreateMultiplePdfs(IEnumerable<GalleryElement> doujins)
+        {
+            foreach (var doujin in doujins)
+            {
+                CreatePdfAsync(doujin, doujin.id.ToString() + ".pdf");
+            }
+            
+        }
+
         static void CreatePdf(GalleryElement doujin, string filename)
         {
             // set pdf path/name
@@ -126,7 +135,7 @@ namespace nh
             Console.WriteLine("Saved successfully!");
         }
 
-        static void CreatePdfNoVerbose(GalleryElement doujin, string filename)
+        static async Task CreatePdfAsync(GalleryElement doujin, string filename)
         {
             // set pdf path/name
             var file = new FileInfo(filename);
