@@ -22,9 +22,10 @@ namespace nh
 
         static async Task Main(string[] args)
         {
+            string[] lastTags = null;
             while (true)
             {
-                Console.Write("Enter an id: ");
+                Console.Write("Enter an id or command: ");
 
                 string strInput = Console.ReadLine();
 
@@ -48,11 +49,23 @@ namespace nh
                     }
                     await Multiple(doujins);
                 }
+                else if ((strInput == string.Empty) && (lastTags != null))
+                {
+                    try
+                    {
+                        await GetRandomWithTags(lastTags);
+                    }
+                    catch (InvalidArgumentException)
+                    {
+                        continue;
+                    }
+                }
                 else if (strInput == "random")
                 {
                     try
                     {
                         await GetRandom();
+                        lastTags = new string[] { "languages:english" };
                     }
                     catch (InvalidArgumentException)
                     {
@@ -61,9 +74,13 @@ namespace nh
                 }
                 else if (strInput == "taglist")
                 {
+                    Console.Write("Tags: ");
+                    strInput = Console.ReadLine();
+                    var tags = (strInput + ",languages:english").Split(",");
                     try
                     {
-                        await GetRandomWithTags();
+                        await GetRandomWithTags(tags);
+                        lastTags = tags;
                     }
                     catch (InvalidArgumentException)
                     {
@@ -101,15 +118,16 @@ namespace nh
             var tags = new string[] { languageTag };
             var result = await SearchClient.SearchWithTagsAsync(tags);
 
-            Console.WriteLine("Number of pages: " + result.numPages);
-            Console.WriteLine("Number per page: " + result.numPerPage);
+            //Console.WriteLine("Number of pages: " + result.numPages);
+            //Console.WriteLine("Number per page: " + result.numPerPage);
 
             var lastPage = await SearchClient.SearchWithTagsAsync(tags, result.numPages);
             var lastPageLength = lastPage.elements.Length;
-            Console.WriteLine("LastPageLength: " + lastPageLength);
+            //Console.WriteLine("LastPageLength: " + lastPageLength);
 
             int totalDoujins = ((result.numPages - 1) * result.numPerPage) + lastPageLength;
-            Console.WriteLine("Total doujins: " + totalDoujins);
+            Console.WriteLine("Total found: " + totalDoujins);
+            Console.WriteLine();
 
             int i = _rnd.Next(1, totalDoujins + 1);
 
@@ -120,22 +138,20 @@ namespace nh
             await GetDoujin(id);
         }
 
-        private static async Task GetRandomWithTags()
+        private static async Task GetRandomWithTags(string[] tags)
         {
-            Console.Write("Tags: ");
-            var strInput = Console.ReadLine();
-            var tags = (strInput + ",languages:english").Split(",");
             var result = await SearchClient.SearchWithTagsAsync(tags);
 
-            Console.WriteLine("Number of pages: " + result.numPages);
-            Console.WriteLine("Number per page: " + result.numPerPage);
+            //Console.WriteLine("Number of pages: " + result.numPages);
+            //Console.WriteLine("Number per page: " + result.numPerPage);
 
             var lastPage = await SearchClient.SearchWithTagsAsync(tags);
             var lastPageLength = lastPage.elements.Length;
-            Console.WriteLine("LastPageLength: " + lastPageLength);
+            //Console.WriteLine("LastPageLength: " + lastPageLength);
 
             int totalDoujins = ((result.numPages - 1) * result.numPerPage) + lastPageLength;
-            Console.WriteLine("Total doujins: " + totalDoujins);
+            Console.WriteLine("Total found: " + totalDoujins);
+            Console.WriteLine();
 
             int i = _rnd.Next(1, totalDoujins + 1);
 
